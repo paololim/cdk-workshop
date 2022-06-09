@@ -1,19 +1,32 @@
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
-import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apiGateway from 'aws-cdk-lib/aws-apigateway';
 
-export class CdkWorkshopStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+export class CdkWorkshopStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const queue = new sqs.Queue(this, 'CdkWorkshopQueue', {
-      visibilityTimeout: Duration.seconds(300)
+    // define a new AWS lambda function
+    const hello = new lambda.Function(this, 'HelloHandler', {
+      runtime: lambda.Runtime.NODEJS_14_X, // execution environment
+      code: lambda.Code.fromAsset('lambda'), // code loaded from "lambda" directory
+      handler: 'hello.handler', // file is "hello", function is "handler"
     });
 
-    const topic = new sns.Topic(this, 'CdkWorkshopTopic');
+    // define a new AWS lambda function
+    const foobar = new lambda.Function(this, 'FoobarHandler', {
+      runtime: lambda.Runtime.NODEJS_14_X,
+      code: lambda.Code.fromAsset('lambda'),
+      handler: 'foobar.handler',
+    });
 
-    topic.addSubscription(new subs.SqsSubscription(queue));
+    // api gateway rest endpoints
+    new apiGateway.LambdaRestApi(this, 'HelloEndpoint', {
+      handler: hello,
+    });
+
+    new apiGateway.LambdaRestApi(this, 'FoobarEndpoint', {
+      handler: foobar,
+    });
   }
 }
