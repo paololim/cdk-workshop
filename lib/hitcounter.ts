@@ -10,8 +10,20 @@ export interface HitCounterProps {
 
 export class HitCounter extends Construct {
 
+  /**
+   * This construct has two AWS components:
+   * 1) lambda function (see: hitcounter.js)
+   *   - get path
+   *   - increment value in dynamo
+   *   - send request to downstream function
+   * 2) dynamo table
+   *   - where we store the count of hits by path
+
   /** allows accessing the counter function */
   public readonly handler: lambda.Function;
+
+  /** expose the hit counter table */
+  public readonly table: dynamodb.Table;
 
   constructor(scope: Construct, id: string, props: HitCounterProps) {
     super(scope, id);
@@ -19,6 +31,8 @@ export class HitCounter extends Construct {
     const table = new dynamodb.Table(this, 'Hits', {
         partitionKey: { name: 'path', type: dynamodb.AttributeType.STRING }
     });
+
+    this.table = table;
 
     this.handler = new lambda.Function(this, 'HitCounterHandler', {
       runtime: lambda.Runtime.NODEJS_14_X,
