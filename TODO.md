@@ -1,3 +1,3 @@
 ### start here next:
 
-https://cdkworkshop.com/20-typescript/50-table-viewer.html
+https://cdkworkshop.com/20-typescript/70-advanced-topics/100-construct-testing.html
